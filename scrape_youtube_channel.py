@@ -9,7 +9,9 @@ Due to the dynamic nature of YouTube's frontend, the script talks to the same
 internal API the website uses (``youtubei/v1/browse``). The required keys and
 context objects are sourced from the ``ytcfg`` configuration dictionary that is
 also embedded in the HTML. All HTTP requests are made with the standard library
-(`urllib.request`) so that the script has no third-party runtime dependencies.
+(`urllib.request`). When the ``beautifulsoup4`` package is installed the real
+Beautiful Soup implementation is used; otherwise the script falls back to a
+bundled minimal parser so that it can operate in restricted environments.
 
 Example usage::
 
@@ -30,7 +32,10 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin
 from urllib.request import Request, build_opener
 
-from bs4 import BeautifulSoup
+try:  # pragma: no cover - import-time optional dependency resolution
+    from bs4 import BeautifulSoup  # type: ignore[import]
+except ModuleNotFoundError:  # pragma: no cover - fallback for restricted envs
+    from lite_soup import BeautifulSoup
 
 YOUTUBE_BASE_URL = "https://www.youtube.com"
 DEFAULT_HEADERS = {
